@@ -1,0 +1,166 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        180,
+        0
+      ],
+      "id": "c736886b-12a9-4be1-a01d-bc09ad5ce9e3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FAoKqwqRlM4GFAFRzbw_PtSKHzwepLVHcWibrhjS-N4",
+          "mode": "list",
+          "cachedResultName": "Daily standup update  (Responses)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FAoKqwqRlM4GFAFRzbw_PtSKHzwepLVHcWibrhjS-N4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1859168421,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FAoKqwqRlM4GFAFRzbw_PtSKHzwepLVHcWibrhjS-N4/edit#gid=1859168421"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        380,
+        0
+      ],
+      "id": "5da18ce8-54bb-41c2-ad61-f43397d0c474",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EGBYDERymPlUeEdl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=we have conducted a team meeting and each candidate have filled with their corresponding works , now anaylyse the data and draft a mail to share with them as i have verified their task , ensure to remind them about their task \n\nthis is the data : {{ $json['1.  What did you work on since the last stand-up? '] }} , {{ $json['2.  What will you work on today? '] }} , {{ $json['3.  Are you facing any blockers or challenges? '] }} , {{ $json['4.  Task Priority Level '] }} , {{ $json['5.  Who is responsible for this task/update? '] }}\n\ndraft a email with action item and the reminder in a brief without the subject , just provide the content to send in the email ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        740,
+        0
+      ],
+      "id": "ee5ce484-e509-41fe-9275-15d4683a3799",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        700,
+        240
+      ],
+      "id": "03307cf2-c25a-454e-ab09-54e07553f22e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HczWjzWJfVRSZyBU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets').item.json['Email '] }}",
+        "subject": "Daily Task reminder",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1140,
+        0
+      ],
+      "id": "f35ba74b-a85f-4404-bb5d-d9d3ad43d3f2",
+      "name": "Gmail",
+      "webhookId": "fa0eb920-5328-4540-8a71-e772c003df52",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cCUKtoxssB178LZu",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f60b6fbc-1b20-43bb-852e-ddad41fefd05",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6039534158739b213921a9c2dd18114592790b2d3cc11d5d3626de87f4c751e6"
+  },
+  "id": "ymvvHQsj59QXufSO",
+  "tags": []
+}
